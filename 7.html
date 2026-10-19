@@ -1,0 +1,1849 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PixBisPaint V2.4</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  color-scheme:dark;
+  --bg:#191a24;
+  --panel:#242638;
+  --panel2:#30344b;
+  --border:#36394f;
+  --pink:#ff79bd;
+  --text:#f4f3fc;
+  --muted:#a9aec4;
+}
+body{
+  margin:0;
+  padding:12px;
+  background:var(--bg);
+  color:var(--text);
+  font:14px Arial,sans-serif;
+}
+button,input,select{font:inherit}
+button{
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:var(--text);
+  padding:10px;
+  border-radius:9px;
+  cursor:pointer;
+}
+button:active{transform:scale(.98)}
+input,select{
+  color:var(--text);
+  background:#171925;
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:8px;
+  min-width:0;
+}
+header{margin-bottom:12px}
+h1{
+  font-size:20px;
+  color:var(--pink);
+  margin:4px 0 10px;
+}
+.topbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+}
+.topbar button{flex:1 0 auto}
+#exportBtn{
+  background:var(--pink);
+  color:#261523;
+  font-weight:bold;
+}
+.projectbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:12px 0 10px;
+  gap:8px;
+}
+#projectTitle{font-weight:bold}
+#sizeStatus{font-size:12px;color:var(--muted)}
+#canvasViewport{
+  width:100%;
+  height:min(92vw,390px);
+  min-height:250px;
+  overflow:auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#202231;
+  border:1px solid var(--border);
+  border-radius:13px;
+  touch-action:pan-x pan-y;
+  margin-bottom:10px;
+}
+#view{
+  display:block;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+  touch-action:none;
+  flex-shrink:0;
+}
+.status{
+  display:flex;
+  justify-content:space-between;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:12px;
+}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:12px;
+  margin-bottom:12px;
+}
+.section-title{
+  color:#b8bdd2;
+  font-weight:bold;
+  font-size:11px;
+  letter-spacing:1px;
+  margin-bottom:10px;
+}
+.tools{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+  margin-bottom:12px;
+}
+.tools button{padding:9px 3px;font-size:12px}
+.tools button.active{
+  background:#57334f;
+  border-color:var(--pink);
+  color:white;
+}
+.control-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:12px 0;
+}
+.control-row input[type=range]{width:65%}
+.control-row input[type=number]{width:65px}
+.control-row select{max-width:115px}
+.color-head{
+  font-size:11px;
+  letter-spacing:1px;
+  color:#b8bdd2;
+  font-weight:bold;
+  margin:12px 0;
+}
+.color-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+#color{
+  width:42px;
+  height:42px;
+  padding:3px;
+}
+#hexColor{width:100px;text-align:center}
+#palette{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:5px;
+}
+.swatch{
+  height:29px;
+  padding:0;
+  border:2px solid #ffffff25;
+  border-radius:8px;
+}
+.check-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:12px;
+}
+.check-row input{
+  width:18px;
+  height:18px;
+  accent-color:var(--pink);
+}
+.size-inputs{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+}
+.full-button{width:100%;margin-top:8px}
+.preview-layout{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+#preview{
+  width:100%;
+  aspect-ratio:1;
+  image-rendering:pixelated;
+  background-color:#202231;
+  background-image:
+    linear-gradient(45deg,#36394b 25%,transparent 25%),
+    linear-gradient(-45deg,#36394b 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#36394b 75%),
+    linear-gradient(-45deg,transparent 75%,#36394b 75%);
+  background-size:16px 16px;
+  background-position:0 0,0 8px,8px -8px,-8px 0;
+  border-radius:5px;
+}
+.about{color:var(--muted);line-height:1.8;font-size:12px}
+#layers{display:flex;flex-direction:column;gap:5px}
+.layer{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:5px;
+  border:1px solid var(--border);
+  border-radius:7px;
+}
+.layer.selected{border-color:var(--pink)}
+.layer button{padding:7px}
+.layerName{
+  flex:1;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.layer-actions{
+  display:flex;
+  gap:5px;
+  margin-top:8px;
+}
+.layer-actions button{flex:1}
+#selectionTools{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:5px;
+}
+#selectionTools button{font-size:12px}
+.muted{color:var(--muted);font-size:12px;line-height:1.5}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>▦ PixBisPaint <span style="color:#a9aec4">V2.4</span></h1>
+  <div class="topbar">
+    <button id="newBtn">＋ New</button>
+    <button id="undoBtn">↶ Undo</button>
+    <button id="redoBtn">↷ Redo</button>
+    <button id="saveBtn">Save Project</button>
+    <button id="loadBtn">Open Project</button>
+    <button id="exportBtn">Export PNG</button>
+  </div>
+  <input id="fileInput" type="file" accept=".pbp,.json" hidden>
+</header>
+
+<div class="projectbar">
+  <input id="projectName" value="Untitled pixel art"
+    aria-label="Project name" style="flex:1">
+  <span id="sizeStatus">32 × 32 px</span>
+</div>
+
+<div id="canvasViewport">
+  <canvas id="view" width="32" height="32"></canvas>
+</div>
+
+<div class="status">
+  <span id="drawingStatus">Ready to draw</span>
+  <span id="zoomStatus">Zoom: 800%</span>
+</div>
+
+<section class="panel">
+  <div class="section-title">TOOLS</div>
+  <div class="tools" id="toolbar">
+    <button data-tool="pencil" class="active">✎ Pencil</button>
+    <button data-tool="eraser">▱ Eraser</button>
+    <button data-tool="fill">▧ Fill</button>
+    <button data-tool="picker">⌕ Picker</button>
+    <button data-tool="line">／ Line</button>
+    <button data-tool="rect">□ Rect</button>
+    <button data-tool="circle">○ Circle</button>
+    <button data-tool="erasefill">▨ EraseFill</button>
+    <button data-tool="select">▣ Select</button>
+    <button data-tool="pan">✋ Pan</button>
+  </div>
+
+  <div class="control-row">
+    <label for="brushSize">Brush</label>
+    <input id="brushSize" type="range" min="1" max="32" value="1">
+    <span id="brushValue">1</span>
+  </div>
+
+  <div class="control-row">
+    <label for="shapeMode">Shape</label>
+    <select id="shapeMode">
+      <option value="outline">Outline</option>
+      <option value="filled">Filled</option>
+    </select>
+  </div>
+
+  <div class="color-head">COLOR</div>
+  <div class="color-row">
+    <input id="color" type="color" value="#ff79bd">
+    <input id="hexColor" value="#FF79BD" maxlength="7"
+      aria-label="Hex color">
+  </div>
+  <div id="palette"></div>
+
+  <label class="check-row">
+    <span>Grid</span>
+    <input id="gridToggle" type="checkbox" checked>
+  </label>
+  <label class="check-row">
+    <span>White background</span>
+    <input id="bgToggle" type="checkbox">
+  </label>
+
+  <div class="section-title" style="margin-top:18px">CANVAS SIZE</div>
+  <div class="size-inputs">
+    <div class="control-row">
+      <label for="canvasWidth">Width</label>
+      <input id="canvasWidth" type="number" min="1" max="512" value="32">
+    </div>
+    <div class="control-row">
+      <label for="canvasHeight">Height</label>
+      <input id="canvasHeight" type="number" min="1" max="512" value="32">
+    </div>
+  </div>
+  <button id="resizeBtn" class="full-button">Resize canvas</button>
+
+  <div class="section-title" style="margin-top:18px">ZOOM</div>
+  <div class="control-row">
+    <button id="zoomOut">−</button>
+    <input id="zoomSlider" type="range" min="50" max="1600" value="800">
+    <button id="zoomIn">＋</button>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-title">SELECTION</div>
+  <div id="selectionTools">
+    <button id="copyBtn">Copy</button>
+    <button id="cutBtn">Cut</button>
+    <button id="pasteBtn">Paste</button>
+    <button id="deleteBtn">Delete</button>
+    <button id="flipHBtn">Flip Horizontal</button>
+    <button id="flipVBtn">Flip Vertical</button>
+    <button id="rotateBtn">Rotate 90°</button>
+    <button id="clearSelectionBtn">Clear Selection</button>
+  </div>
+  <p class="muted">Select an area, then drag inside it to move it.</p>
+</section>
+
+<section class="panel">
+  <div class="section-title">LAYERS</div>
+  <div id="layers"></div>
+  <div class="layer-actions">
+    <button id="addLayerBtn">＋ Add</button>
+    <button id="renameLayerBtn">Rename</button>
+    <button id="deleteLayerBtn">Delete</button>
+  </div>
+  <div class="layer-actions">
+    <button id="layerUpBtn">↑ Up</button>
+    <button id="layerDownBtn">↓ Down</button>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-title">PREVIEW</div>
+  <div class="preview-layout">
+    <canvas id="preview" width="32" height="32"></canvas>
+    <div>
+      <div class="section-title">ABOUT V2.4</div>
+      <div class="about">
+        • Mobile touch drawing<br>
+        • Editable .PBP projects<br>
+        • Transparent PNG export<br>
+        • Undo and redo<br>
+        • Pixel-perfect shapes<br>
+        • Multiple layers
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+
+
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const view = $("view");
+const ctx = view.getContext("2d", { willReadFrequently: true });
+const preview = $("preview");
+const previewCtx = preview.getContext("2d");
+const viewport = $("canvasViewport");
+
+let W = 32;
+let H = 32;
+let zoom = 8;
+
+let showGrid = true;
+let whiteBackground = false;
+let currentTool = "pencil";
+
+let drawing = false;
+let spaceDown = false;
+let panPointer = false;
+let panStart = null;
+let startPoint = null;
+let lastPoint = null;
+let shapeStart = null;
+let beforeShape = null;
+
+let selection = null;
+let selectionDrag = null;
+let clipboard = null;
+let pasteOffset = 0;
+
+const MAX_HISTORY = 40;
+const MAX_LAYERS = 20;
+
+let layers = [];
+let activeLayerId = null;
+let nextLayerId = 1;
+
+let undoStack = [];
+let redoStack = [];
+
+const paletteColors = [
+  "#ffffff", "#cbd5e1", "#64748b", "#1e293b", "#000000",
+  "#ff79bd", "#ff3d81", "#ff8a65", "#ffc857", "#fff176",
+  "#7ee787", "#20c477", "#52d6be", "#4cc9f0", "#4895ef",
+  "#4361ee", "#7209b7", "#b5179e", "#a3e635", "#8d6e63"
+];
+
+function makeCanvas(width = W, height = H) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  return canvas;
+}
+
+function makeLayer(name) {
+  return {
+    id: nextLayerId++,
+    name,
+    visible: true,
+    canvas: makeCanvas()
+  };
+}
+
+function activeLayer() {
+  return layers.find(layer => layer.id === activeLayerId)
+    || layers[0];
+}
+
+function layerContext(layer) {
+  return layer.canvas.getContext("2d", {
+    willReadFrequently: true
+  });
+}
+
+function getSnapshot() {
+  return {
+    width: W,
+    height: H,
+    nextLayerId,
+    activeLayerId,
+    layers: layers.map(layer => ({
+      id: layer.id,
+      name: layer.name,
+      visible: layer.visible,
+      pixels: layerContext(layer).getImageData(0, 0, W, H)
+    })),
+    selection: selection ? { ...selection } : null
+  };
+}
+
+function restoreSnapshot(snapshot) {
+  W = snapshot.width;
+  H = snapshot.height;
+  nextLayerId = snapshot.nextLayerId;
+  activeLayerId = snapshot.activeLayerId;
+
+  layers = snapshot.layers.map(saved => {
+    const canvas = makeCanvas(W, H);
+    canvas.getContext("2d").putImageData(saved.pixels, 0, 0);
+
+    return {
+      id: saved.id,
+      name: saved.name,
+      visible: saved.visible,
+      canvas
+    };
+  });
+
+  selection = snapshot.selection
+    ? { ...snapshot.selection }
+    : null;
+
+  if (!layers.some(layer => layer.id === activeLayerId)) {
+    activeLayerId = layers[0]?.id ?? null;
+  }
+
+  renderAll();
+  renderLayers();
+  updateHistoryButtons();
+}
+
+function remember() {
+  undoStack.push(getSnapshot());
+
+  if (undoStack.length > MAX_HISTORY) {
+    undoStack.shift();
+  }
+
+  redoStack = [];
+  updateHistoryButtons();
+}
+
+function undo() {
+  if (!undoStack.length) return;
+
+  redoStack.push(getSnapshot());
+  restoreSnapshot(undoStack.pop());
+}
+
+function redo() {
+  if (!redoStack.length) return;
+
+  undoStack.push(getSnapshot());
+  restoreSnapshot(redoStack.pop());
+}
+
+function updateHistoryButtons() {
+  $("undoBtn").disabled = undoStack.length === 0;
+  $("redoBtn").disabled = redoStack.length === 0;
+}
+
+function updateCanvasInputs() {
+  $("canvasWidth").value = W;
+  $("canvasHeight").value = H;
+  $("sizeStatus").textContent = `${W} × ${H} px`;
+}
+
+function setZoom(value) {
+  zoom = Math.max(0.5, Math.min(16, value));
+
+  view.style.width = `${W * zoom}px`;
+  view.style.height = `${H * zoom}px`;
+
+  $("zoomSlider").value = Math.round(zoom * 100);
+  $("zoomStatus").textContent =
+    `Zoom: ${Math.round(zoom * 100)}%`;
+
+  renderAll();
+}
+
+function compositeCanvas() {
+  const canvas = makeCanvas();
+  const c = canvas.getContext("2d");
+
+  for (const layer of layers) {
+    if (layer.visible) {
+      c.drawImage(layer.canvas, 0, 0);
+    }
+  }
+
+  return canvas;
+}
+
+function drawSelectionOutline() {
+  if (!selection) return;
+
+  const { x, y, w, h } = selection;
+
+  ctx.save();
+  ctx.lineWidth = 1 / zoom;
+  ctx.setLineDash([3 / zoom, 2 / zoom]);
+  ctx.strokeStyle = "#000000";
+  ctx.strokeRect(x, y, w, h);
+
+  ctx.lineDashOffset = 2 / zoom;
+  ctx.strokeStyle = "#ffffff";
+  ctx.strokeRect(x, y, w, h);
+  ctx.restore();
+}
+
+function renderAll() {
+  view.width = W;
+  view.height = H;
+  view.style.width = `${W * zoom}px`;
+  view.style.height = `${H * zoom}px`;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // White background is optional.
+  // When unchecked, transparent pixels remain transparent.
+  if (whiteBackground) {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Composite all visible layers.
+  for (const layer of layers) {
+    if (layer.visible) {
+      ctx.drawImage(layer.canvas, 0, 0);
+    }
+  }
+
+  // Pixel grid is drawn above the artwork.
+  if (showGrid && zoom >= 2) {
+    ctx.save();
+    ctx.strokeStyle = "#88888866";
+    ctx.lineWidth = 1 / zoom;
+    ctx.beginPath();
+
+    for (let x = 0; x <= W; x++) {
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, H);
+    }
+
+    for (let y = 0; y <= H; y++) {
+      ctx.moveTo(0, y);
+      ctx.lineTo(W, y);
+    }
+
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  drawSelectionOutline();
+
+  // Update the preview separately from the main canvas.
+  preview.width = W;
+  preview.height = H;
+
+  previewCtx.clearRect(0, 0, W, H);
+
+  if (whiteBackground) {
+    previewCtx.fillStyle = "#ffffff";
+    previewCtx.fillRect(0, 0, W, H);
+  }
+
+  for (const layer of layers) {
+    if (layer.visible) {
+      previewCtx.drawImage(layer.canvas, 0, 0);
+    }
+  }
+
+  updateCanvasInputs();
+}
+
+function renderLayers() {
+  const container = $("layers");
+  container.replaceChildren();
+
+  for (const layer of [...layers].reverse()) {
+    const row = document.createElement("div");
+
+    row.className = "layer" +
+      (layer.id === activeLayerId ? " selected" : "");
+
+    const eye = document.createElement("button");
+    eye.textContent = layer.visible ? "◉" : "○";
+    eye.title = "Toggle layer visibility";
+
+    eye.addEventListener("click", event => {
+      event.stopPropagation();
+      remember();
+      layer.visible = !layer.visible;
+      renderLayers();
+      renderAll();
+    });
+
+    const name = document.createElement("button");
+    name.className = "layerName";
+    name.textContent = layer.name;
+
+    name.addEventListener("click", () => {
+      activeLayerId = layer.id;
+      renderLayers();
+    });
+
+    row.append(eye, name);
+    container.append(row);
+  }
+}
+
+function setTool(tool) {
+  currentTool = tool;
+
+  document.querySelectorAll("[data-tool]").forEach(button => {
+    button.classList.toggle(
+      "active",
+      button.dataset.tool === tool
+    );
+  });
+
+  $("drawingStatus").textContent =
+    "Tool: " + tool.charAt(0).toUpperCase() + tool.slice(1);
+}
+
+document.querySelectorAll("[data-tool]").forEach(button => {
+  button.addEventListener("click", () => {
+    setTool(button.dataset.tool);
+  });
+});
+
+
+function pos(event) {
+  const rect = view.getBoundingClientRect();
+
+  return {
+    x: Math.floor((event.clientX - rect.left) * W / rect.width),
+    y: Math.floor((event.clientY - rect.top) * H / rect.height)
+  };
+}
+
+function inside(x, y) {
+  return x >= 0 && y >= 0 && x < W && y < H;
+}
+
+function hexToRGBA(hex) {
+  const value = hex.replace("#", "");
+
+  return [
+    parseInt(value.slice(0, 2), 16),
+    parseInt(value.slice(2, 4), 16),
+    parseInt(value.slice(4, 6), 16),
+    255
+  ];
+}
+
+function sameColor(data, index, color) {
+  return data[index] === color[0] &&
+    data[index + 1] === color[1] &&
+    data[index + 2] === color[2] &&
+    data[index + 3] === color[3];
+}
+
+function paintPixel(x, y, color) {
+  if (!inside(x, y)) return;
+
+  const layer = activeLayer();
+  if (!layer) return;
+
+  const c = layerContext(layer);
+  c.fillStyle = color;
+  c.fillRect(x, y, 1, 1);
+}
+
+function erasePixel(x, y) {
+  if (!inside(x, y)) return;
+
+  const layer = activeLayer();
+  if (!layer) return;
+
+  layerContext(layer).clearRect(x, y, 1, 1);
+}
+
+function brushLine(x0, y0, x1, y1, erase = false) {
+  let dx = Math.abs(x1 - x0);
+  let dy = Math.abs(y1 - y0);
+
+  const sx = x0 < x1 ? 1 : -1;
+  const sy = y0 < y1 ? 1 : -1;
+
+  let error = dx - dy;
+
+  const size = Math.max(
+    1,
+    Math.min(32, Number($("brushSize").value) || 1)
+  );
+
+  const offset = Math.floor(size / 2);
+
+  while (true) {
+    for (let bx = 0; bx < size; bx++) {
+      for (let by = 0; by < size; by++) {
+        const px = x0 + bx - offset;
+        const py = y0 + by - offset;
+
+        if (erase) erasePixel(px, py);
+        else paintPixel(px, py, $("color").value);
+      }
+    }
+
+    if (x0 === x1 && y0 === y1) break;
+
+    const e2 = 2 * error;
+
+    if (e2 > -dy) {
+      error -= dy;
+      x0 += sx;
+    }
+
+    if (e2 < dx) {
+      error += dx;
+      y0 += sy;
+    }
+  }
+}
+
+function flood(x, y, eraseMode = false) {
+  if (!inside(x, y)) return;
+
+  const layer = activeLayer();
+  if (!layer) return;
+
+  const c = layerContext(layer);
+  const image = c.getImageData(0, 0, W, H);
+  const data = image.data;
+  const index = (y * W + x) * 4;
+
+  const target = [
+    data[index],
+    data[index + 1],
+    data[index + 2],
+    data[index + 3]
+  ];
+
+  // EraseFill clears a connected region of the same
+  // non-transparent color.
+  if (eraseMode && target[3] === 0) return;
+
+  const replacement = eraseMode
+    ? [0, 0, 0, 0]
+    : hexToRGBA($("color").value);
+
+  if (
+    target[0] === replacement[0] &&
+    target[1] === replacement[1] &&
+    target[2] === replacement[2] &&
+    target[3] === replacement[3]
+  ) return;
+
+  const stack = [[x, y]];
+  const visited = new Uint8Array(W * H);
+
+  while (stack.length) {
+    const [px, py] = stack.pop();
+
+    if (!inside(px, py)) continue;
+
+    const pixelId = py * W + px;
+    if (visited[pixelId]) continue;
+
+    visited[pixelId] = 1;
+
+    const i = pixelId * 4;
+    if (!sameColor(data, i, target)) continue;
+
+    data[i] = replacement[0];
+    data[i + 1] = replacement[1];
+    data[i + 2] = replacement[2];
+    data[i + 3] = replacement[3];
+
+    stack.push(
+      [px + 1, py],
+      [px - 1, py],
+      [px, py + 1],
+      [px, py - 1]
+    );
+  }
+
+  c.putImageData(image, 0, 0);
+}
+
+function drawLineOnLayer(x0, y0, x1, y1) {
+  const layer = activeLayer();
+  if (!layer) return;
+
+  const c = layerContext(layer);
+
+  c.strokeStyle = $("color").value;
+  c.lineWidth = 1;
+  c.lineCap = "butt";
+
+  c.beginPath();
+  c.moveTo(x0 + 0.5, y0 + 0.5);
+  c.lineTo(x1 + 0.5, y1 + 0.5);
+  c.stroke();
+}
+
+function drawShapeOnLayer(x0, y0, x1, y1, type) {
+  const layer = activeLayer();
+  if (!layer) return;
+
+  const c = layerContext(layer);
+  const filled = $("shapeMode").value === "filled";
+
+  c.fillStyle = $("color").value;
+  c.strokeStyle = $("color").value;
+  c.lineWidth = 1;
+
+  const left = Math.min(x0, x1);
+  const top = Math.min(y0, y1);
+  const width = Math.abs(x1 - x0) + 1;
+  const height = Math.abs(y1 - y0) + 1;
+
+  if (type === "rect") {
+    if (filled) {
+      c.fillRect(left, top, width, height);
+    } else {
+      c.strokeRect(
+        left + 0.5,
+        top + 0.5,
+        Math.max(0, width - 1),
+        Math.max(0, height - 1)
+      );
+    }
+
+    return;
+  }
+
+  c.beginPath();
+
+  c.ellipse(
+    left + width / 2,
+    top + height / 2,
+    Math.max(0.5, width / 2),
+    Math.max(0.5, height / 2),
+    0,
+    0,
+    Math.PI * 2
+  );
+
+  if (filled) c.fill();
+  else c.stroke();
+}
+
+// Keep the color input and hexadecimal input synchronized.
+$("color").addEventListener("input", () => {
+  $("hexColor").value = $("color").value.toUpperCase();
+});
+
+$("hexColor").addEventListener("change", () => {
+  let value = $("hexColor").value.trim();
+
+  if (!value.startsWith("#")) value = "#" + value;
+
+  if (/^#[0-9a-fA-F]{6}$/.test(value)) {
+    $("color").value = value;
+    $("hexColor").value = value.toUpperCase();
+  } else {
+    $("hexColor").value = $("color").value.toUpperCase();
+  }
+});
+
+$("brushSize").addEventListener("input", () => {
+  $("brushValue").textContent = $("brushSize").value;
+});
+
+// Grid checkbox: redraw the canvas immediately.
+$("gridToggle").addEventListener("change", () => {
+  showGrid = $("gridToggle").checked;
+  renderAll();
+});
+
+// White background checkbox: redraw the canvas immediately.
+$("bgToggle").addEventListener("change", () => {
+  whiteBackground = $("bgToggle").checked;
+  renderAll();
+});
+
+// Initialize the checkbox states from the variables.
+$("gridToggle").checked = showGrid;
+$("bgToggle").checked = whiteBackground;
+
+function normalizedSelection(a, b) {
+  const left = Math.min(a.x, b.x);
+  const top = Math.min(a.y, b.y);
+  const right = Math.max(a.x, b.x);
+  const bottom = Math.max(a.y, b.y);
+
+  return {
+    x: Math.max(0, left),
+    y: Math.max(0, top),
+    w: Math.min(W - Math.max(0, left), right - left + 1),
+    h: Math.min(H - Math.max(0, top), bottom - top + 1)
+  };
+}
+
+function getSelectionPixels(rect = selection) {
+  if (!rect || rect.w <= 0 || rect.h <= 0) return null;
+
+  return layerContext(activeLayer()).getImageData(
+    rect.x, rect.y, rect.w, rect.h
+  );
+}
+
+function clearSelectionPixels(rect = selection) {
+  if (!rect) return;
+
+  layerContext(activeLayer()).clearRect(
+    rect.x, rect.y, rect.w, rect.h
+  );
+}
+
+function drawSelectionPixels(pixels, x, y) {
+  if (!pixels) return;
+
+  const temp = makeCanvas(pixels.width, pixels.height);
+  temp.getContext("2d").putImageData(pixels, 0, 0);
+
+  layerContext(activeLayer()).drawImage(temp, x, y);
+}
+
+function copySelection(cut = false) {
+  if (!selection) {
+    $("drawingStatus").textContent = "Select an area first!";
+    return;
+  }
+
+  const pixels = getSelectionPixels();
+  if (!pixels) return;
+
+  clipboard = {
+    width: pixels.width,
+    height: pixels.height,
+    pixels
+  };
+
+  pasteOffset = 0;
+
+  if (cut) {
+    remember();
+    clearSelectionPixels();
+    renderAll();
+  }
+
+  $("drawingStatus").textContent = cut
+    ? "Selection cut"
+    : "Selection copied";
+}
+
+function pasteSelection() {
+  if (!clipboard) {
+    $("drawingStatus").textContent = "Nothing copied yet!";
+    return;
+  }
+
+  remember();
+
+  const canvas = makeCanvas(clipboard.width, clipboard.height);
+  canvas.getContext("2d").putImageData(clipboard.pixels, 0, 0);
+
+  pasteOffset++;
+
+  const x = Math.min(W - 1, pasteOffset);
+  const y = Math.min(H - 1, pasteOffset);
+  const w = Math.min(clipboard.width, W - x);
+  const h = Math.min(clipboard.height, H - y);
+
+  selection = { x, y, w, h };
+
+  const clipped = makeCanvas(w, h);
+  clipped.getContext("2d").drawImage(canvas, 0, 0);
+
+  selectionDrag = {
+    mode: "paste",
+    pixels: clipped.getContext("2d").getImageData(0, 0, w, h),
+    original: { ...selection }
+  };
+
+  drawSelectionPixels(selectionDrag.pixels, x, y);
+  selectionDrag = null;
+
+  renderAll();
+  $("drawingStatus").textContent = "Selection pasted";
+}
+
+function deleteSelection() {
+  if (!selection) return;
+
+  remember();
+  clearSelectionPixels();
+  selection = null;
+
+  renderAll();
+  $("drawingStatus").textContent = "Selection deleted";
+}
+
+function flipSelection(horizontal = true) {
+  if (!selection) return;
+
+  remember();
+
+  const rect = { ...selection };
+  const pixels = getSelectionPixels(rect);
+
+  const temp = makeCanvas(rect.w, rect.h);
+  const c = temp.getContext("2d");
+
+  c.translate(
+    horizontal ? rect.w : 0,
+    horizontal ? 0 : rect.h
+  );
+  c.scale(horizontal ? -1 : 1, horizontal ? 1 : -1);
+
+  const source = makeCanvas(rect.w, rect.h);
+  source.getContext("2d").putImageData(pixels, 0, 0);
+  c.drawImage(source, 0, 0);
+
+  clearSelectionPixels(rect);
+
+  const flipped = c.getImageData(0, 0, rect.w, rect.h);
+  drawSelectionPixels(flipped, rect.x, rect.y);
+
+  renderAll();
+}
+
+function rotateSelection() {
+  if (!selection) return;
+
+  remember();
+
+  const rect = { ...selection };
+  const pixels = getSelectionPixels(rect);
+
+  const source = makeCanvas(rect.w, rect.h);
+  source.getContext("2d").putImageData(pixels, 0, 0);
+
+  const temp = makeCanvas(rect.h, rect.w);
+  const c = temp.getContext("2d");
+
+  c.translate(temp.width, 0);
+  c.rotate(Math.PI / 2);
+  c.drawImage(source, 0, 0);
+
+  clearSelectionPixels(rect);
+
+  const outW = Math.min(temp.width, W - rect.x);
+  const outH = Math.min(temp.height, H - rect.y);
+
+  const clipped = c.getImageData(0, 0, outW, outH);
+
+  selection = {
+    x: rect.x,
+    y: rect.y,
+    w: outW,
+    h: outH
+  };
+
+  drawSelectionPixels(clipped, rect.x, rect.y);
+  renderAll();
+}
+
+$("copyBtn").addEventListener("click", () => copySelection(false));
+$("cutBtn").addEventListener("click", () => copySelection(true));
+$("pasteBtn").addEventListener("click", pasteSelection);
+$("deleteBtn").addEventListener("click", deleteSelection);
+$("flipHBtn").addEventListener("click", () => flipSelection(true));
+$("flipVBtn").addEventListener("click", () => flipSelection(false));
+$("rotateBtn").addEventListener("click", rotateSelection);
+
+$("clearSelectionBtn").addEventListener("click", () => {
+  selection = null;
+  selectionDrag = null;
+  renderAll();
+});
+
+function pointerDown(event) {
+  if (
+    event.button === 1 ||
+    spaceDown ||
+    currentTool === "pan"
+  ) {
+    panPointer = true;
+    panStart = {
+      x: event.clientX,
+      y: event.clientY,
+      left: viewport.scrollLeft,
+      top: viewport.scrollTop
+    };
+
+    event.preventDefault();
+    return;
+  }
+
+  if (event.button !== 0) return;
+
+  event.preventDefault();
+  view.setPointerCapture?.(event.pointerId);
+
+  const p = pos(event);
+  if (!inside(p.x, p.y)) return;
+
+  if (currentTool === "picker") {
+    const pixel = layerContext(activeLayer()).getImageData(
+      p.x, p.y, 1, 1
+    ).data;
+
+    if (pixel[3] > 0) {
+      const hex = "#" + [pixel[0], pixel[1], pixel[2]]
+        .map(v => v.toString(16).padStart(2, "0"))
+        .join("");
+
+      $("color").value = hex;
+      $("hexColor").value = hex.toUpperCase();
+    }
+
+    return;
+  }
+
+  if (currentTool === "fill" || currentTool === "erasefill") {
+    remember();
+    flood(p.x, p.y, currentTool === "erasefill");
+    renderAll();
+    $("drawingStatus").textContent = "Drawing updated";
+    return;
+  }
+
+  if (currentTool === "select") {
+    if (
+      selection &&
+      p.x >= selection.x && p.x < selection.x + selection.w &&
+      p.y >= selection.y && p.y < selection.y + selection.h
+    ) {
+      remember();
+
+      const pixels = getSelectionPixels();
+      clearSelectionPixels();
+
+      selectionDrag = {
+        mode: "move",
+        pixels,
+        offsetX: p.x - selection.x,
+        offsetY: p.y - selection.y,
+        original: { ...selection }
+      };
+
+      drawing = true;
+      renderAll();
+      return;
+    }
+
+    selectionDrag = { mode: "create", start: p };
+    selection = { x: p.x, y: p.y, w: 1, h: 1 };
+    drawing = true;
+    renderAll();
+    return;
+  }
+
+  remember();
+
+  drawing = true;
+  startPoint = p;
+  lastPoint = p;
+
+  if (
+    currentTool === "line" ||
+    currentTool === "rect" ||
+    currentTool === "circle"
+  ) {
+    shapeStart = p;
+    beforeShape = layerContext(activeLayer()).getImageData(
+      0, 0, W, H
+    );
+  } else if (currentTool === "pencil") {
+    brushLine(p.x, p.y, p.x, p.y);
+  } else if (currentTool === "eraser") {
+    brushLine(p.x, p.y, p.x, p.y, true);
+  }
+
+  renderAll();
+}
+
+function pointerMove(event) {
+  if (panPointer && panStart) {
+    viewport.scrollLeft =
+      panStart.left - (event.clientX - panStart.x);
+    viewport.scrollTop =
+      panStart.top - (event.clientY - panStart.y);
+    return;
+  }
+
+  if (!drawing) return;
+
+  const p = pos(event);
+
+  if (currentTool === "select" && selectionDrag) {
+    if (selectionDrag.mode === "create") {
+      selection = normalizedSelection(selectionDrag.start, p);
+    } else if (selectionDrag.mode === "move") {
+      selection = {
+        ...selectionDrag.original,
+        x: Math.max(0, Math.min(
+          W - selectionDrag.original.w,
+          p.x - selectionDrag.offsetX
+        )),
+        y: Math.max(0, Math.min(
+          H - selectionDrag.original.h,
+          p.y - selectionDrag.offsetY
+        ))
+      };
+    }
+
+    renderAll();
+    return;
+  }
+
+  if (currentTool === "pencil") {
+    brushLine(lastPoint.x, lastPoint.y, p.x, p.y);
+    lastPoint = p;
+  } else if (currentTool === "eraser") {
+    brushLine(lastPoint.x, lastPoint.y, p.x, p.y, true);
+    lastPoint = p;
+  } else if (
+    currentTool === "line" ||
+    currentTool === "rect" ||
+    currentTool === "circle"
+  ) {
+    const c = layerContext(activeLayer());
+    c.putImageData(beforeShape, 0, 0);
+
+    if (currentTool === "line") {
+      drawLineOnLayer(shapeStart.x, shapeStart.y, p.x, p.y);
+    } else {
+      drawShapeOnLayer(
+        shapeStart.x, shapeStart.y, p.x, p.y, currentTool
+      );
+    }
+  }
+
+  renderAll();
+}
+
+function pointerUp(event) {
+  if (panPointer) {
+    panPointer = false;
+    panStart = null;
+    return;
+  }
+
+  if (!drawing) return;
+
+  const p = pos(event);
+
+  if (currentTool === "select" && selectionDrag) {
+    if (selectionDrag.mode === "move") {
+      drawSelectionPixels(
+        selectionDrag.pixels,
+        selection.x,
+        selection.y
+      );
+    }
+
+    selectionDrag = null;
+  } else if (
+    beforeShape &&
+    shapeStart &&
+    ["line", "rect", "circle"].includes(currentTool)
+  ) {
+    const c = layerContext(activeLayer());
+    c.putImageData(beforeShape, 0, 0);
+
+    if (currentTool === "line") {
+      drawLineOnLayer(shapeStart.x, shapeStart.y, p.x, p.y);
+    } else {
+      drawShapeOnLayer(
+        shapeStart.x, shapeStart.y, p.x, p.y, currentTool
+      );
+    }
+  }
+
+  drawing = false;
+  startPoint = null;
+  lastPoint = null;
+  shapeStart = null;
+  beforeShape = null;
+
+  renderAll();
+  $("drawingStatus").textContent = "Drawing updated";
+}
+
+view.addEventListener("pointerdown", pointerDown);
+view.addEventListener("pointermove", pointerMove);
+view.addEventListener("pointerup", pointerUp);
+view.addEventListener("pointercancel", pointerUp);
+
+window.addEventListener("pointerup", pointerUp);
+
+$("zoomIn").addEventListener("click", () => setZoom(zoom + 0.5));
+$("zoomOut").addEventListener("click", () => setZoom(zoom - 0.5));
+
+$("zoomSlider").addEventListener("input", event => {
+  setZoom(Number(event.target.value) / 100);
+});
+
+window.addEventListener("keydown", event => {
+  if (
+    event.code === "Space" &&
+    !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)
+  ) {
+    spaceDown = true;
+    event.preventDefault();
+  }
+
+  if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) {
+    return;
+  }
+
+  if ((event.ctrlKey || event.metaKey) &&
+      event.key.toLowerCase() === "z") {
+    event.preventDefault();
+    if (event.shiftKey) redo();
+    else undo();
+  }
+
+  if ((event.ctrlKey || event.metaKey) &&
+      event.key.toLowerCase() === "y") {
+    event.preventDefault();
+    redo();
+  }
+
+  if ((event.ctrlKey || event.metaKey) &&
+      event.key.toLowerCase() === "c") {
+    event.preventDefault();
+    copySelection(false);
+  }
+
+  if ((event.ctrlKey || event.metaKey) &&
+      event.key.toLowerCase() === "x") {
+    event.preventDefault();
+    copySelection(true);
+  }
+
+  if ((event.ctrlKey || event.metaKey) &&
+      event.key.toLowerCase() === "v") {
+    event.preventDefault();
+    pasteSelection();
+  }
+
+  if (event.key === "Delete" || event.key === "Backspace") {
+    if (selection) {
+      event.preventDefault();
+      deleteSelection();
+    }
+  }
+});
+
+window.addEventListener("keyup", event => {
+  if (event.code === "Space") spaceDown = false;
+});
+
+
+$("undoBtn").addEventListener("click", undo);
+$("redoBtn").addEventListener("click", redo);
+
+// ---------- LAYERS ----------
+
+$("addLayerBtn").addEventListener("click", () => {
+  if (layers.length >= MAX_LAYERS) {
+    alert("Maximum of 20 layers reached!");
+    return;
+  }
+
+  remember();
+
+  const layer = makeLayer(`Layer ${layers.length + 1}`);
+  layers.push(layer);
+  activeLayerId = layer.id;
+
+  renderLayers();
+  renderAll();
+});
+
+$("renameLayerBtn").addEventListener("click", () => {
+  const layer = activeLayer();
+  if (!layer) return;
+
+  const name = prompt("Enter layer name:", layer.name);
+
+  if (name === null || !name.trim()) return;
+
+  remember();
+  layer.name = name.trim().slice(0, 80);
+
+  renderLayers();
+});
+
+$("deleteLayerBtn").addEventListener("click", () => {
+  if (layers.length <= 1) {
+    alert("You must keep at least one layer!");
+    return;
+  }
+
+  if (!confirm("Delete the selected layer?")) return;
+
+  remember();
+
+  const index = layers.findIndex(
+    layer => layer.id === activeLayerId
+  );
+
+  layers.splice(index, 1);
+
+  activeLayerId =
+    layers[Math.max(0, index - 1)].id;
+
+  renderLayers();
+  renderAll();
+});
+
+function moveLayer(direction) {
+  const index = layers.findIndex(
+    layer => layer.id === activeLayerId
+  );
+
+  const target = index + direction;
+
+  if (
+    index < 0 ||
+    target < 0 ||
+    target >= layers.length
+  ) return;
+
+  remember();
+
+  [layers[index], layers[target]] =
+    [layers[target], layers[index]];
+
+  renderLayers();
+  renderAll();
+}
+
+$("layerUpBtn").addEventListener("click", () => moveLayer(1));
+$("layerDownBtn").addEventListener("click", () => moveLayer(-1));
+
+// ---------- COLOR PALETTE ----------
+
+for (const color of paletteColors) {
+  const swatch = document.createElement("button");
+
+  swatch.className = "swatch";
+  swatch.style.backgroundColor = color;
+  swatch.title = color;
+  swatch.setAttribute("aria-label", color);
+
+  swatch.addEventListener("click", () => {
+    $("color").value = color;
+    $("hexColor").value = color.toUpperCase();
+  });
+
+  $("palette").append(swatch);
+}
+
+// ---------- PROJECT SAVE / LOAD ----------
+
+function projectData() {
+  return {
+    app: "PixBisPaint",
+    version: "2.4",
+    name: $("projectName").value || "Untitled pixel art",
+    width: W,
+    height: H,
+    whiteBackground,
+    showGrid,
+    activeLayerId,
+    nextLayerId,
+
+    layers: layers.map(layer => ({
+      id: layer.id,
+      name: layer.name,
+      visible: layer.visible,
+      pixels: Array.from(
+        layerContext(layer).getImageData(
+          0, 0, W, H
+        ).data
+      )
+    }))
+  };
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = filename;
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+function safeFilename(name) {
+  return (name || "Untitled pixel art")
+    .replace(/[<>:"/\\|?*\x00-\x1f]/g, "_");
+}
+
+$("saveBtn").addEventListener("click", () => {
+  try {
+    const data = JSON.stringify(projectData());
+
+    downloadBlob(
+      new Blob([data], { type: "application/json" }),
+      safeFilename($("projectName").value) + ".PBP"
+    );
+
+    $("drawingStatus").textContent = "Project saved";
+  } catch (error) {
+    console.error(error);
+    alert("Could not save the project.");
+  }
+});
+
+$("loadBtn").addEventListener("click", () => {
+  $("fileInput").click();
+});
+
+$("fileInput").addEventListener("change", async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const data = JSON.parse(await file.text());
+
+    const newW = Math.max(
+      1, Math.min(512, Number(data.width) || 32)
+    );
+
+    const newH = Math.max(
+      1, Math.min(512, Number(data.height) || 32)
+    );
+
+    // Support both multilayer V2.4 projects and older
+    // single-layer projects that store their pixels in data.pixels.
+    const savedLayers =
+      Array.isArray(data.layers) && data.layers.length
+        ? data.layers
+        : [{
+            id: 1,
+            name: "Layer 1",
+            visible: true,
+            pixels: data.pixels
+          }];
+
+    if (savedLayers.length > MAX_LAYERS) {
+      throw new Error("Project contains too many layers.");
+    }
+
+    const loadedLayers = savedLayers.map((saved, index) => {
+      const canvas = makeCanvas(newW, newH);
+      const c = canvas.getContext("2d");
+
+      if (Array.isArray(saved.pixels)) {
+        const expected = newW * newH * 4;
+        const pixels = new Uint8ClampedArray(expected);
+
+        for (
+          let i = 0;
+          i < Math.min(expected, saved.pixels.length);
+          i++
+        ) {
+          pixels[i] = saved.pixels[i];
+        }
+
+        c.putImageData(
+          new ImageData(pixels, newW, newH),
+          0, 0
+        );
+      }
+
+      return {
+        id: Number(saved.id) || index + 1,
+        name: String(saved.name || `Layer ${index + 1}`),
+        visible: saved.visible !== false,
+        canvas
+      };
+    });
+
+    W = newW;
+    H = newH;
+    layers = loadedLayers;
+
+    nextLayerId = Math.max(
+      Number(data.nextLayerId) || 1,
+      ...layers.map(layer => layer.id + 1)
+    );
+
+    activeLayerId = Number(data.activeLayerId) || layers[0].id;
+
+    if (!layers.some(layer => layer.id === activeLayerId)) {
+      activeLayerId = layers[0].id;
+    }
+
+    whiteBackground = data.whiteBackground === true;
+    showGrid = data.showGrid !== false;
+
+    $("gridToggle").checked = showGrid;
+    $("bgToggle").checked = whiteBackground;
+
+    $("projectName").value =
+      data.name || file.name.replace(/\.[^.]+$/, "");
+
+    selection = null;
+    selectionDrag = null;
+    clipboard = null;
+
+    undoStack = [];
+    redoStack = [];
+
+    renderLayers();
+    renderAll();
+    updateHistoryButtons();
+
+    $("drawingStatus").textContent = "Project loaded";
+  } catch (error) {
+    console.error(error);
+    alert("Could not open the project. The file may be invalid.");
+  }
+
+  event.target.value = "";
+});
+
+// ---------- PNG EXPORT ----------
+
+$("exportBtn").addEventListener("click", () => {
+  try {
+    const output = makeCanvas(W, H);
+    const c = output.getContext("2d");
+
+    if (whiteBackground) {
+      c.fillStyle = "#ffffff";
+      c.fillRect(0, 0, W, H);
+    }
+
+    for (const layer of layers) {
+      if (layer.visible) {
+        c.drawImage(layer.canvas, 0, 0);
+      }
+    }
+
+    output.toBlob(blob => {
+      if (!blob) {
+        alert("PNG export failed.");
+        return;
+      }
+
+      downloadBlob(
+        blob,
+        safeFilename($("projectName").value) + ".png"
+      );
+
+      $("drawingStatus").textContent = "PNG exported";
+    }, "image/png");
+  } catch (error) {
+    console.error(error);
+    alert("Could not export PNG.");
+  }
+});
+
+// ---------- CANVAS RESIZE ----------
+
+$("resizeBtn").addEventListener("click", () => {
+  const newW = Math.max(
+    1, Math.min(512, Number($("canvasWidth").value) || W)
+  );
+
+  const newH = Math.max(
+    1, Math.min(512, Number($("canvasHeight").value) || H)
+  );
+
+  if (newW === W && newH === H) return;
+
+  remember();
+
+  for (const layer of layers) {
+    const resized = makeCanvas(newW, newH);
+
+    resized.getContext("2d").drawImage(
+      layer.canvas, 0, 0
+    );
+
+    layer.canvas = resized;
+  }
+
+  W = newW;
+  H = newH;
+  selection = null;
+
+  renderAll();
+  $("drawingStatus").textContent = "Canvas resized";
+});
+
+// ---------- NEW PROJECT ----------
+
+$("newBtn").addEventListener("click", () => {
+  if (!confirm("Start a new project? Unsaved work will be lost.")) {
+    return;
+  }
+
+  W = 32;
+  H = 32;
+
+  nextLayerId = 1;
+  layers = [makeLayer("Layer 1")];
+  activeLayerId = layers[0].id;
+
+  undoStack = [];
+  redoStack = [];
+
+  selection = null;
+  selectionDrag = null;
+  clipboard = null;
+  pasteOffset = 0;
+
+  whiteBackground = false;
+  showGrid = true;
+
+  $("projectName").value = "Untitled pixel art";
+  $("color").value = "#ff79bd";
+  $("hexColor").value = "#FF79BD";
+  $("brushSize").value = 1;
+  $("brushValue").textContent = "1";
+
+  $("gridToggle").checked = showGrid;
+  $("bgToggle").checked = whiteBackground;
+
+  renderLayers();
+  renderAll();
+  updateHistoryButtons();
+  setZoom(zoom);
+
+  $("drawingStatus").textContent = "New project";
+});
+
+// ---------- INITIALIZE ----------
+
+function initialize() {
+  layers = [makeLayer("Layer 1")];
+  activeLayerId = layers[0].id;
+
+  $("gridToggle").checked = showGrid;
+  $("bgToggle").checked = whiteBackground;
+
+  $("hexColor").value = $("color").value.toUpperCase();
+
+  renderLayers();
+  renderAll();
+  updateHistoryButtons();
+  setZoom(zoom);
+}
+
+initialize();
+
+</script>
+</body>
+</html>
